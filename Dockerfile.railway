@@ -5,10 +5,10 @@ RUN npm install -g pnpm@10
 
 WORKDIR /app
 
-# Copy only the bot's own package.json (no workspace needed)
-COPY bots/aura-bot/package.json ./package.json
+# Create a standalone package.json with explicit versions (no pnpm catalog: syntax)
+RUN echo '{"name":"aura-bot","version":"1.0.0","type":"module","dependencies":{"discord.js":"^14.16.3","openai":"^4.77.0"},"devDependencies":{"@types/node":"^25.3.3","esbuild":"0.27.3","tsx":"^4.21.0","typescript":"~5.9.2"}}' > package.json
 
-# Install all dependencies (including devDeps for esbuild)
+# Install all dependencies
 RUN pnpm install
 
 # Copy source and build script
@@ -24,7 +24,7 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Only the compiled bundle — all deps are bundled inside by esbuild
+# Only the compiled bundle — all deps are bundled by esbuild
 COPY --from=builder /app/dist ./dist
 
 CMD ["node", "--enable-source-maps", "dist/index.mjs"]
