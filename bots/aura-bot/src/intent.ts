@@ -10,6 +10,7 @@ export type Intent =
   | { kind: "datetime" }
   | { kind: "my-stats" }
   | { kind: "owner-stats" }
+  | { kind: "compliment" }
   | { kind: "free-question" };
 
 interface Keyword {
@@ -100,6 +101,23 @@ const CHANNEL_KEYWORDS: Keyword[] = [
   { channel: "hauptchat", patterns: [/hauptchat/i] },
   // generic fallbacks last
   { channel: "agentur-events", patterns: [/kampagnen?/i] },
+];
+
+const COMPLIMENT_PATTERNS = [
+  /\b(du bist|bist du|ich find dich|ich finde dich)\b.{0,30}\b(toll|super|cool|klasse|geil|nice|stark|hammer|spitze|genial|großartig|wunderbar|fantastisch|perfekt|top|mega|amazing|awesome|göttlich|outstanding)\b/i,
+  /\b(toll|super|cool|klasse|geil|nice|stark|hammer|spitze|genial|großartig|wunderbar|fantastisch|perfekt|top|mega|amazing|awesome)\b.{0,30}\b(du|bist|dich|dir)\b/i,
+  /\bich (mag|liebe|schätze|respektiere) dich\b/i,
+  /\bdu (machst|machst das|machst es).{0,20}(gut|super|toll|klasse|perfekt|richtig gut|sehr gut|wirklich gut)\b/i,
+  /\bgut gemacht\b/i,
+  /\b(danke|dankeschön|danke dir|vielen dank)\b/i,
+  /\bdu (bist|warst) (der|die|das) (beste|tollste|coolste|genialste)\b/i,
+  /\bnice work\b|\bwell done\b|\bgreat job\b/i,
+  /\b(du hilfst|du hast geholfen|danke für die hilfe|danke für deine hilfe)\b/i,
+  /\b(respekt|props|chapeau|hut ab)\b/i,
+  /\bdu bist (echt |wirklich )?(ein )?(guter bot|hilfsbereit|freundlich|nett|lieb)\b/i,
+  /\bich (find|finde) dich (echt |wirklich )?(gut|toll|super|cool|klasse|nice)\b/i,
+  /\b(mach weiter so|weiter so)\b/i,
+  /\b(ich bin (beeindruckt|begeistert)|beeindruckend|begeisternd)\b.{0,30}\b(du|dich|dir)\b/i,
 ];
 
 const MY_STATS_PATTERNS = [
@@ -239,6 +257,11 @@ export function detectIntent(text: string): Intent {
 
   if (OWNER_STATS_PATTERNS.some((p) => p.test(cleaned))) {
     return { kind: "owner-stats" };
+  }
+
+  // Compliment detection
+  if (COMPLIMENT_PATTERNS.some((p) => p.test(cleaned))) {
+    return { kind: "compliment" };
   }
 
   // Date / time queries
