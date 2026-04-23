@@ -519,6 +519,19 @@ async function handleTrigger(message: Message): Promise<void> {
       return;
     }
 
+    // 0c. Compliment — give one back!
+    if (intent.kind === "compliment") {
+      const reply = await askAura(
+        `Der Creator hat dir gerade ein Kompliment gemacht oder sich bedankt. Reagiere herzlich und gib ihm/ihr ein aufrichtiges, persönliches Kompliment zurück. Sei kreativ, authentisch und locker — kein generisches "Danke". Beziehe dich darauf, dass er/sie Teil der Aura Influence Agentur ist und als Creator aktiv ist. Max 2-3 Sätze.`,
+        "",
+        [],
+        userHistory,
+      );
+      addToHistory(userId, message.content, reply);
+      await sendAuraReply(message, reply, greet);
+      return;
+    }
+
     // 1. Newest member
     if (intent.kind === "newest-member") {
       const channelId = config.channels["neu-dazugekommen"];
