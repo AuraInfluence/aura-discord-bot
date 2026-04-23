@@ -1,0 +1,9 @@
+node_modules
+**/node_modules
+**/dist
+.git
+.local
+attached_assets
+artifacts/aura-status/src
+artifacts/api-server/src
+artifacts/mockup-sandbox/src
