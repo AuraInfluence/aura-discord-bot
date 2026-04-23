@@ -81555,6 +81555,22 @@ var CHANNEL_KEYWORDS = [
   // generic fallbacks last
   { channel: "agentur-events", patterns: [/kampagnen?/i] }
 ];
+var COMPLIMENT_PATTERNS = [
+  /\b(du bist|bist du|ich find dich|ich finde dich)\b.{0,30}\b(toll|super|cool|klasse|geil|nice|stark|hammer|spitze|genial|großartig|wunderbar|fantastisch|perfekt|top|mega|amazing|awesome|göttlich|outstanding)\b/i,
+  /\b(toll|super|cool|klasse|geil|nice|stark|hammer|spitze|genial|großartig|wunderbar|fantastisch|perfekt|top|mega|amazing|awesome)\b.{0,30}\b(du|bist|dich|dir)\b/i,
+  /\bich (mag|liebe|schätze|respektiere) dich\b/i,
+  /\bdu (machst|machst das|machst es).{0,20}(gut|super|toll|klasse|perfekt|richtig gut|sehr gut|wirklich gut)\b/i,
+  /\bgut gemacht\b/i,
+  /\b(danke|dankeschön|danke dir|vielen dank)\b/i,
+  /\bdu (bist|warst) (der|die|das) (beste|tollste|coolste|genialste)\b/i,
+  /\bnice work\b|\bwell done\b|\bgreat job\b/i,
+  /\b(du hilfst|du hast geholfen|danke für die hilfe|danke für deine hilfe)\b/i,
+  /\b(respekt|props|chapeau|hut ab)\b/i,
+  /\bdu bist (echt |wirklich )?(ein )?(guter bot|hilfsbereit|freundlich|nett|lieb)\b/i,
+  /\bich (find|finde) dich (echt |wirklich )?(gut|toll|super|cool|klasse|nice)\b/i,
+  /\b(mach weiter so|weiter so)\b/i,
+  /\b(ich bin (beeindruckt|begeistert)|beeindruckend|begeisternd)\b.{0,30}\b(du|dich|dir)\b/i
+];
 var MY_STATS_PATTERNS = [
   /meine?\s+stats?/i,
   /mei\w*\s+stats?/i,
@@ -81673,6 +81689,9 @@ function detectIntent(text) {
   }
   if (OWNER_STATS_PATTERNS.some((p2) => p2.test(cleaned))) {
     return { kind: "owner-stats" };
+  }
+  if (COMPLIMENT_PATTERNS.some((p2) => p2.test(cleaned))) {
+    return { kind: "compliment" };
   }
   if (/\b(uhrzeit|wie sp[äa]t|wieviel uhr|wie viel uhr|aktuelle(r|s)?\s*(uhrzeit|tag|datum)|welche(r|s)?\s*(tag|datum|wochentag)|datum|heute|wochentag)\b/i.test(cleaned)) {
     return { kind: "datetime" };
@@ -88783,6 +88802,17 @@ ${text}` : text;
 ${weatherData}
 
 Gib eine freundliche, kurze Wetterauskunft auf Deutsch.`,
+        "",
+        [],
+        userHistory
+      );
+      addToHistory(userId, message.content, reply2);
+      await sendAuraReply(message, reply2, greet);
+      return;
+    }
+    if (intent.kind === "compliment") {
+      const reply2 = await askAura(
+        `Der Creator hat dir gerade ein Kompliment gemacht oder sich bedankt. Reagiere herzlich und gib ihm/ihr ein aufrichtiges, pers\xF6nliches Kompliment zur\xFCck. Sei kreativ, authentisch und locker \u2014 kein generisches "Danke". Beziehe dich darauf, dass er/sie Teil der Aura Influence Agentur ist und als Creator aktiv ist. Max 2-3 S\xE4tze.`,
         "",
         [],
         userHistory
