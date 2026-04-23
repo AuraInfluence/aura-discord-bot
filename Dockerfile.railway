@@ -1,0 +1,35 @@
+# ── Build stage ────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+RUN npm install -g pnpm@10
+
+WORKDIR /app
+
+# Copy workspace files for pnpm install
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+
+# Copy all package manifests so pnpm resolves the workspace correctly
+COPY artifacts/api-server/package.json ./artifacts/api-server/
+COPY artifacts/aura-status/package.json ./artifacts/aura-status/
+COPY artifacts/mockup-sandbox/package.json ./artifacts/mockup-sandbox/
+COPY bots/aura-bot/package.json ./bots/aura-bot/
+
+# Copy bot source + build script
+COPY bots/aura-bot/src ./bots/aura-bot/src
+COPY bots/aura-bot/build.mjs ./bots/aura-bot/
+
+# Install all dependencies (esbuild is a devDep, needed for build)
+RUN pnpm install --frozen-lockfile
+
+# Compile the bot to JavaScript
+RUN pnpm --filter @workspace/aura-bot run build
+
+# ── Production stage ──────────────────────────────────────────────────────────
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Only copy the compiled bundle — all deps are bundled inside
+COPY --from=builder /app/bots/aura-bot/dist ./dist
+
+CMD ["node", "--enable-source-maps", "dist/index.mjs"]
